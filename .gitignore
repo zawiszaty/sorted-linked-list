@@ -1,0 +1,34 @@
+# Dependencies
+/vendor/
+
+# Composer
+/composer.phar
+
+# PHPUnit
+/.phpunit.result.cache
+
+# PHPStan
+/phpstan-baseline.neon
+/phpstan.neon.tmp
+
+# Psalm
+/.psalm/
+/psalm-baseline.xml
+
+# PHP CS Fixer
+/.php-cs-fixer.cache
+
+# Infection
+/infection.log
+/infection.json
+/infection-*.log
+
+# Benchmarks artifacts (keep baseline in repo)
+/benchmarks/latest.json
+/benchmarks/latest.txt
+
+# IDE / OS
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db

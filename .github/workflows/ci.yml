@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer
+
+      - name: Validate composer
+        run: composer validate --no-check-publish
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Upload vendor artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vendor-php85
+          path: vendor
+          if-no-files-found: error
+
+  phpstan:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer
+
+      - name: Download vendor artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vendor-php85
+          path: vendor
+
+      - name: Run PHPStan
+        run: composer stan
+
+  cs-check:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer
+
+      - name: Download vendor artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vendor-php85
+          path: vendor
+
+      - name: Run CS check
+        run: composer cs:check
+
+  psalm:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer
+
+      - name: Download vendor artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vendor-php85
+          path: vendor
+
+      - name: Run Psalm
+        run: composer psalm
+
+  tests:
+    runs-on: ubuntu-latest
+    needs: [phpstan, cs-check, psalm]
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run tests
+        run: composer test
+
+  mutation-testing:
+    runs-on: ubuntu-latest
+    needs: [phpstan, cs-check, psalm]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP with Xdebug
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: xdebug
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run infection
+        run: composer infection
+        env:
+          XDEBUG_MODE: coverage

@@ -1,0 +1,42 @@
+{
+    "name": "zawiszaty/sorted-linked-list",
+    "description": "Sorted linked list library with strict type safety for int or string values.",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.2",
+        "ext-iconv": "*"
+    },
+    "require-dev": {
+        "ext-xdebug": "*",
+        "friendsofphp/php-cs-fixer": "^3.76",
+        "infection/infection": "^0.31",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^11.5",
+        "vimeo/psalm": "^6.11"
+    },
+    "autoload": {
+        "psr-4": {
+            "Zawiszaty\\SortedLinkedList\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Zawiszaty\\SortedLinkedList\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "stan": "phpstan analyse --xdebug",
+        "psalm": "XDG_CACHE_HOME=/tmp psalm",
+        "cs:check": "php-cs-fixer fix --dry-run --diff",
+        "infection": "infection"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "infection/extension-installer": true
+        }
+    }
+}

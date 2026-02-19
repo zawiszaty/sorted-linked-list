@@ -1,0 +1,53 @@
+name: Performance
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      strict:
+        description: Fail workflow on performance regression
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run benchmark (text)
+        run: php benchmarks/performance.php --repeats=5 --warmup=1 | tee benchmarks/latest.txt
+
+      - name: Run benchmark (json)
+        run: php benchmarks/performance.php --json --repeats=5 --warmup=1 > benchmarks/latest.json
+
+      - name: Compare with baseline (strict mode)
+        if: github.event_name == 'workflow_dispatch' && inputs.strict == true
+        run: php benchmarks/check-regression.php benchmarks/latest.json benchmarks/baseline.json 0.30
+
+      - name: Compare with baseline (soft mode)
+        if: github.event_name != 'workflow_dispatch' || inputs.strict != true
+        run: php benchmarks/check-regression.php benchmarks/latest.json benchmarks/baseline.json 0.30 || true
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: |
+            benchmarks/latest.txt
+            benchmarks/latest.json

@@ -26,11 +26,11 @@
         }
     },
     "scripts": {
-        "test": "phpunit",
-        "stan": "phpstan analyse --xdebug",
-        "psalm": "XDG_CACHE_HOME=/tmp psalm",
-        "cs:check": "php-cs-fixer fix --dry-run --diff",
-        "infection": "infection"
+        "test": "php vendor/bin/phpunit",
+        "stan": "php vendor/bin/phpstan analyse --xdebug",
+        "psalm": "XDG_CACHE_HOME=/tmp php vendor/bin/psalm",
+        "cs:check": "php vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "infection": "php vendor/bin/infection"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,

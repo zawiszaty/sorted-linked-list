@@ -30,11 +30,11 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Run benchmark (text)
-        run: php benchmarks/performance.php --repeats=5 --warmup=1 | tee benchmarks/latest.txt
-
       - name: Run benchmark (json)
         run: php benchmarks/performance.php --json --repeats=5 --warmup=1 > benchmarks/latest.json
+
+      - name: Render text report
+        run: php benchmarks/render-report.php benchmarks/latest.json > benchmarks/latest.txt
 
       - name: Compare with baseline (strict mode)
         if: github.event_name == 'workflow_dispatch' && inputs.strict == true

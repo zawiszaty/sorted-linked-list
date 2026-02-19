@@ -15,6 +15,13 @@ use Traversable;
 use InvalidArgumentException;
 
 /**
+ * Sorted singly linked list that maintains ascending order after every mutation.
+ *
+ * Each instance stores exactly one value type (`int` or `string`) selected
+ * through factory methods.
+ *
+ * @author Zawiszaty
+ * @package Zawiszaty\SortedLinkedList
  * @implements IteratorAggregate<int, int|string>
  */
 final class SortedLinkedList implements Countable, IteratorAggregate
@@ -36,16 +43,34 @@ final class SortedLinkedList implements Countable, IteratorAggregate
             : $this->defaultComparator($type);
     }
 
+    /**
+     * Creates a list instance that accepts only integers.
+     *
+     * @param callable(int, int): int|null $comparator Optional comparator that returns <0, 0 or >0.
+     */
     public static function forInt(?callable $comparator = null): self
     {
         return new self(self::TYPE_INT, $comparator);
     }
 
+    /**
+     * Creates a list instance that accepts only strings.
+     *
+     * @param callable(string, string): int|null $comparator Optional comparator that returns <0, 0 or >0.
+     */
     public static function forString(?callable $comparator = null): self
     {
         return new self(self::TYPE_STRING, $comparator);
     }
 
+    /**
+     * Inserts a value while preserving sorted order.
+     *
+     * Duplicate values are appended after existing equal values.
+     *
+     * @throws TypeMismatchException When the value type does not match the list type.
+     * @throws InvalidArgumentException When comparator returns a non-int value.
+     */
     public function add(int|string $value): void
     {
         $this->assertValueType($value);
@@ -81,7 +106,14 @@ final class SortedLinkedList implements Countable, IteratorAggregate
     }
 
     /**
-     * @param iterable<int|string> $values
+     * Inserts multiple values while preserving sorted order.
+     *
+     * All values are validated first; if any value is invalid, nothing is inserted.
+     *
+     * @param iterable<int|string> $values Values to insert.
+     *
+     * @throws TypeMismatchException When at least one value type does not match the list type.
+     * @throws InvalidArgumentException When comparator returns a non-int value.
      */
     public function addAll(iterable $values): void
     {
@@ -95,6 +127,14 @@ final class SortedLinkedList implements Countable, IteratorAggregate
         }
     }
 
+    /**
+     * Removes the first occurrence of a value.
+     *
+     * @return bool True when an element was removed, false when value was not found.
+     *
+     * @throws TypeMismatchException When the value type does not match the list type.
+     * @throws InvalidArgumentException When comparator returns a non-int value.
+     */
     public function remove(int|string $value): bool
     {
         $this->assertValueType($value);
@@ -130,6 +170,14 @@ final class SortedLinkedList implements Countable, IteratorAggregate
         return false;
     }
 
+    /**
+     * Removes all occurrences of a value.
+     *
+     * @return int Number of removed elements.
+     *
+     * @throws TypeMismatchException When the value type does not match the list type.
+     * @throws InvalidArgumentException When comparator returns a non-int value.
+     */
     public function removeAll(int|string $value): int
     {
         $this->assertValueType($value);
@@ -180,6 +228,11 @@ final class SortedLinkedList implements Countable, IteratorAggregate
         return $removed;
     }
 
+    /**
+     * Removes an element at the given sorted index.
+     *
+     * @throws IndexOutOfBoundsException When index is outside list bounds.
+     */
     public function removeAt(int $index): void
     {
         $this->assertValidIndex($index);
@@ -204,6 +257,12 @@ final class SortedLinkedList implements Countable, IteratorAggregate
         $this->size--;
     }
 
+    /**
+     * Checks whether the list contains a value.
+     *
+     * @throws TypeMismatchException When the value type does not match the list type.
+     * @throws InvalidArgumentException When comparator returns a non-int value.
+     */
     public function contains(int|string $value): bool
     {
         $this->assertValueType($value);
@@ -216,6 +275,8 @@ final class SortedLinkedList implements Countable, IteratorAggregate
     }
 
     /**
+     * Returns the number of elements in the list.
+     *
      * @return int<0, max>
      */
     public function count(): int
@@ -223,16 +284,29 @@ final class SortedLinkedList implements Countable, IteratorAggregate
         return max(0, $this->size);
     }
 
+    /**
+     * Returns whether the list is empty.
+     */
     public function isEmpty(): bool
     {
         return $this->size === 0;
     }
 
+    /**
+     * Returns an element at the given sorted index.
+     *
+     * @throws IndexOutOfBoundsException When index is outside list bounds.
+     */
     public function get(int $index): int|string
     {
         return $this->nodeAt($index)->value;
     }
 
+    /**
+     * Returns the first (smallest) element.
+     *
+     * @throws EmptyListException When the list is empty.
+     */
     public function first(): int|string
     {
         if ($this->head === null) {
@@ -241,6 +315,11 @@ final class SortedLinkedList implements Countable, IteratorAggregate
         return $this->head->value;
     }
 
+    /**
+     * Returns the last (greatest) element.
+     *
+     * @throws EmptyListException When the list is empty.
+     */
     public function last(): int|string
     {
         if ($this->tail === null) {
@@ -249,6 +328,9 @@ final class SortedLinkedList implements Countable, IteratorAggregate
         return $this->tail->value;
     }
 
+    /**
+     * Removes all elements from the list.
+     */
     public function clear(): void
     {
         $this->head = null;
@@ -257,6 +339,8 @@ final class SortedLinkedList implements Countable, IteratorAggregate
     }
 
     /**
+     * Exports list values to a plain PHP array in sorted order.
+     *
      * @return array<int, int|string>
      */
     public function toArray(): array
@@ -268,12 +352,17 @@ final class SortedLinkedList implements Countable, IteratorAggregate
         return $result;
     }
 
+    /**
+     * Returns a readable string representation, e.g. "[1, 2, 3]".
+     */
     public function __toString(): string
     {
         return '[' . implode(', ', array_map(static fn (int|string $value): string => (string) $value, $this->toArray())) . ']';
     }
 
     /**
+     * Returns an iterator that yields values in sorted order.
+     *
      * @return Traversable<int, int|string>
      */
     public function getIterator(): Traversable

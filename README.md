@@ -94,6 +94,38 @@ Run the example:
 php examples/demo.php
 ```
 
+## Performance Benchmarking
+
+Run a quick terminal benchmark:
+
+```bash
+php benchmarks/performance.php
+```
+
+Generate machine-readable results:
+
+```bash
+php benchmarks/performance.php --json > benchmarks/current.json
+```
+
+Render a human-readable report from JSON:
+
+```bash
+php benchmarks/render-report.php benchmarks/current.json
+```
+
+Check performance regression against the baseline (`30%` threshold by default):
+
+```bash
+php benchmarks/check-regression.php benchmarks/current.json benchmarks/baseline.json
+```
+
+Use a custom regression threshold (example `20%`):
+
+```bash
+php benchmarks/check-regression.php benchmarks/current.json benchmarks/baseline.json 0.20
+```
+
 ## Quality Gates
 
 This repository is configured with:

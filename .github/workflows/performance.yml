@@ -4,13 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      strict:
-        description: Fail workflow on performance regression
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   benchmark:
@@ -36,13 +29,8 @@ jobs:
       - name: Render text report
         run: php benchmarks/render-report.php benchmarks/latest.json > benchmarks/latest.txt
 
-      - name: Compare with baseline (strict mode)
-        if: github.event_name == 'workflow_dispatch' && inputs.strict == true
+      - name: Compare with baseline
         run: php benchmarks/check-regression.php benchmarks/latest.json benchmarks/baseline.json 0.30
-
-      - name: Compare with baseline (soft mode)
-        if: github.event_name != 'workflow_dispatch' || inputs.strict != true
-        run: php benchmarks/check-regression.php benchmarks/latest.json benchmarks/baseline.json 0.30 || true
 
       - name: Upload benchmark artifacts
         uses: actions/upload-artifact@v4

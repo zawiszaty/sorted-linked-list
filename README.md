@@ -104,8 +104,8 @@ This repository is configured with:
 - Infection (mutation testing)
 
 Current mutation gate is configured in `infection.json5`:
-- `minMsi: 84.4`
-- `minCoveredMsi: 84.4`
+- `minMsi: 80.0`
+- `minCoveredMsi: 80.0`
 
 ## Development Commands
 

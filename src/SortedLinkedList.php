@@ -32,15 +32,13 @@ final class SortedLinkedList implements Countable, IteratorAggregate
     private ?Node $head = null;
     private ?Node $tail = null;
     private int $size = 0;
-    private string $type;
     private Closure $compare;
 
-    private function __construct(string $type, ?callable $comparator = null)
+    private function __construct(private string $type, ?callable $comparator = null)
     {
-        $this->type = $type;
         $this->compare = $comparator !== null
             ? Closure::fromCallable($comparator)
-            : $this->defaultComparator($type);
+            : $this->defaultComparator($this->type);
     }
 
     /**
